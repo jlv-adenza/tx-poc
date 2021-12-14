@@ -6,6 +6,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.context.event.annotation.AfterTestMethod;
+import org.springframework.test.context.event.annotation.BeforeTestMethod;
 
 @SpringBootTest
 public class TxManagementTests {
@@ -16,6 +18,17 @@ public class TxManagementTests {
     @Autowired
     SampleService svc;
 
+    @BeforeTestMethod
+    public void before() {
+        // Removing any information about last transaction status
+        TransactionChecker.clearTransactionStatus();
+    }
+
+    @AfterTestMethod
+    public void after() {
+        // Removing any information about last transaction status
+        TransactionChecker.clearTransactionStatus();
+    }
     /**
      * See output logs in console for processing details. Note how
      * {@link SomethingStored} event is processed only after transaction has
@@ -25,6 +38,7 @@ public class TxManagementTests {
     @Test
     public void shouldHandleSuccessfulTx() {
         Assertions.assertDoesNotThrow(() -> svc.doInTransaction(false));
+        Assertions.assertEquals(TransactionChecker.TransactionStatus.COMMITTED, TransactionChecker.getTransactionStatus());
     }
 
     /**
@@ -35,6 +49,7 @@ public class TxManagementTests {
     @Test
     public void shouldHandleFailedTx() {
         Assertions.assertThrows(RuntimeException.class, () -> svc.doInTransaction(true));
+        Assertions.assertEquals(TransactionChecker.TransactionStatus.ROLLED_BACK, TransactionChecker.getTransactionStatus());
     }
 
 }

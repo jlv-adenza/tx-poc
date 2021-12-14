@@ -36,9 +36,16 @@ public class SampleService {
     @Transactional
     public void doInTransaction(boolean shouldFail) {
         log.info("STARTING BUSINESS TRANSACTION");
-        publisher.publishEvent(new SomethingCreated());
-        log.info("STORING SOMETHING TO DB");
-        publisher.publishEvent(new SomethingStored());
+        log.info("STORING first trade TO DB ");
+        publisher.publishEvent(new TCacheCreated("Trade Cache"));
+        log.info("STORING first transfer TO DB ");
+        publisher.publishEvent(new TCacheCreated("Transfer Cache"));
+        log.info("STORING first message TO DB ");
+        publisher.publishEvent(new TCacheCreated("Message Cache"));
+
+        // publisher.publishEvent(new SomethingStored());
+        // SomethingStored operation = new SomethingStored();
+        // publisher.publishEvent(operation);
 
         consumer.doSomethingWithCacheOverlay();
 
