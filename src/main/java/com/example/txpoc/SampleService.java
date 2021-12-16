@@ -5,11 +5,14 @@ import org.slf4j.LoggerFactory;
 
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
 @Service
 public class SampleService {
-
+    private static final int txTimeout = -1;
     private static final Logger log = LoggerFactory.getLogger(SampleService.class);
 
     private final CacheOverlayConsumer consumer;
@@ -33,7 +36,7 @@ public class SampleService {
      * @param shouldFail true when method should emulate an error within
      *                   the transaction
      */
-    @Transactional
+    @Transactional(timeout = txTimeout, isolation = Isolation.DEFAULT)
     public void doInTransaction(boolean shouldFail) {
         log.info("STARTING BUSINESS TRANSACTION");
         log.info("STORING first trade TO DB ");
@@ -48,7 +51,11 @@ public class SampleService {
         // publisher.publishEvent(operation);
 
         consumer.doSomethingWithCacheOverlay();
-
+        {
+            // We should not do that
+            TransactionStatus status = TransactionAspectSupport.currentTransactionStatus();
+            log.info("Transaction status = " + status);
+        }
         try {
             if (shouldFail) {
                 throw new RuntimeException("OOPS");

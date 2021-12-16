@@ -8,6 +8,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.event.annotation.AfterTestMethod;
 import org.springframework.test.context.event.annotation.BeforeTestMethod;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 @SpringBootTest
 public class TxManagementTests {
