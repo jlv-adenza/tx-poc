@@ -5,19 +5,41 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.event.annotation.AfterTestMethod;
 import org.springframework.test.context.event.annotation.BeforeTestMethod;
+import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
+import org.springframework.transaction.interceptor.TransactionInterceptor;
+
+import javax.annotation.PostConstruct;
 
 @SpringBootTest
 public class TxManagementTests {
+
 
     @Autowired
     JdbcTemplate jdbcTemplate;
 
     @Autowired
     SampleService svc;
+
+    @Autowired
+    PlatformTransactionManager txManager;
+
+    @Bean("TransactionInterceptor")
+    @DependsOn("TransactionManager")
+    public TransactionInterceptor transactionInterceptor() {
+        TransactionInterceptor interceptor = new TransactionInterceptor();
+        interceptor.setTransactionManager(txManager);
+        return interceptor;
+    }
+
+    @PostConstruct
+    public void postConstruct() {
+    }
 
     @BeforeTestMethod
     public void before() {
